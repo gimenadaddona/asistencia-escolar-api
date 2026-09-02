@@ -1,0 +1,26 @@
+# Entornos y secretos
+.env
+.env.*
+!.env.example
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# Bases de datos locales
+*.db
+*.sqlite3
+
+# Editor
+.vscode/*
+!.vscode/settings.json
+.idea/
+
+# Otros
+.DS_Store
+*.log
