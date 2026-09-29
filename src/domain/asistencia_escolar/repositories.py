@@ -22,6 +22,11 @@ class AlumnoRepository(ABC):
     @abstractmethod
     def listar_por_anio_division(self, anio: AnioEscolar, division: Division) -> List[Alumno]:
         ...
+        
+    @abstractmethod
+    def listar_todos(self) -> List[Alumno]:
+        """Lista todos los alumnos, sin filtro."""
+        ...
 
     @abstractmethod
     def eliminar(self, alumno_id: int) -> None:

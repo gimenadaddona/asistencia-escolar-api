@@ -37,6 +37,9 @@ class FakeAlumnoRepository(AlumnoRepository):
             if a.anio.valor == anio.valor and a.division.valor == division.valor
         ]
 
+    def listar_todos(self) -> List[Alumno]:
+        return list(self._alumnos.values())
+    
     def eliminar(self, alumno_id: int) -> None:
         self._alumnos.pop(alumno_id, None)
 
