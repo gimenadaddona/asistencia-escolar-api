@@ -45,3 +45,18 @@ class ReporteAlertasResponse(BaseModel):
     alertas: List[AlertaAlumnoResponse]
     total_alumnos_en_alerta: int
     
+
+class AlumnoEnSeguimientoResponse(BaseModel):
+    """Un alumno en alerta, junto con todo lo que ya se hizo por el."""
+    alumno_id: int
+    nombre_completo: str
+    anio: str
+    division: str
+    cantidad_faltas_injustificadas: int
+    acciones: List[dict]
+
+
+class ReporteSeguimientoResponse(BaseModel):
+    """Reporte completo para directivo y orientacion: alertas + acciones ya tomadas."""
+    limite_configurado: int
+    alumnos_en_seguimiento: List[AlumnoEnSeguimientoResponse]
