@@ -1,8 +1,8 @@
-﻿from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from src.domain.asistencia_escolar.exceptions import DatosInvalidosError
-from src.infrastructure.fastapi.routers import acciones, alumnos, asistencia, reportes
+from src.infrastructure.fastapi.routers import acciones, alumnos, asistencia, reportes, web
 from src.infrastructure.settings.config import get_settings
 from src.infrastructure.sqlalchemy.database import engine
 from src.infrastructure.sqlalchemy.models import orm_models
@@ -22,6 +22,7 @@ def create_app() -> FastAPI:
     async def manejar_valor_invalido(request: Request, exc: ValueError) -> JSONResponse:
         return JSONResponse(status_code=422, content={"detalle": str(exc)})
 
+    app.include_router(web.router)
     for router in (alumnos.router, asistencia.router, acciones.router, reportes.router):
         app.include_router(router, prefix=settings.API_V1_PREFIX)
 

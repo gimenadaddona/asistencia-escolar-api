@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pasar lista</title>
+<style>
+/* COLORES: para usar la paleta asignada, modificar solo este bloque */
+:root{--primario:#1f5fbf;--sobre-primario:#fff;--fondo:#f4f6fa;--tarjeta:#fff;--texto:#1d2433;--borde:#d5dbe6;--presente:#2e8b57;--ausente:#c0392b}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,sans-serif;background:var(--fondo);color:var(--texto)}
+header{background:var(--primario);color:var(--sobre-primario);padding:16px}
+h1{margin:0;font-size:1.25rem}
+main{max-width:720px;margin:0 auto;padding:16px}
+section{background:var(--tarjeta);border:1px solid var(--borde);border-radius:12px;padding:16px;margin-bottom:16px}
+h2{margin:0 0 12px;font-size:1rem}
+.botones,.motivos{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;min-height:48px;padding:8px 16px;border-radius:10px;border:2px solid var(--borde);background:var(--tarjeta);color:var(--texto);cursor:pointer}
+button.activo{background:var(--primario);border-color:var(--primario);color:var(--sobre-primario)}
+button:disabled{opacity:.5;cursor:not-allowed}
+#guardar{width:100%;font-weight:600;background:var(--primario);border-color:var(--primario);color:var(--sobre-primario)}
+input[type=date]{font:inherit;min-height:48px;padding:8px;border-radius:10px;border:2px solid var(--borde)}
+.nota{margin:8px 0 0;font-size:.9rem}
+.alumno{border:2px solid var(--presente);border-radius:12px;padding:12px;margin-bottom:10px}
+.alumno.ausente{border-color:var(--ausente)}
+.fila{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.nombre{font-weight:600}
+button.estado{min-width:120px;font-weight:700;color:var(--presente);border-color:var(--presente)}
+.ausente button.estado{color:var(--ausente);border-color:var(--ausente)}
+.motivos{margin-top:10px}
+.motivos button{flex:1 1 30%}
+.motivos button.activo{background:var(--ausente);border-color:var(--ausente)}
+.mensaje{display:none;padding:12px;border-radius:10px}
+.mensaje.ok{display:block;background:#e3f4ea;color:#1d5a37}
+.mensaje.error{display:block;background:#fbe6e3;color:#8a2417}
+.oculto{display:none}
+</style>
+</head>
+<body>
+<header><h1>Pasar lista</h1></header>
+<main>
+<section>
+<h2>1. Grado</h2><div id="grados" class="botones"></div>
+<h2 style="margin-top:16px">2. División</h2><div id="divisiones" class="botones"></div>
+<p id="turno" class="nota"></p>
+</section>
+<section><h2>3. Fecha</h2><input type="date" id="fecha"></section>
+<section id="seccion-lista" class="oculto">
+<h2 id="titulo">Alumnos</h2><p id="resumen"></p><div id="lista"></div>
+<button id="guardar" type="button">Guardar asistencia</button>
+</section>
+<div id="mensaje" class="mensaje" role="status"></div>
+</main>
+<script>
+const API = '/api/v1';
+const TURNOS = {A: 'mañana', B: 'mañana', C: 'tarde', D: 'tarde'};
+const MOTIVOS = [['climatico', 'Climático'], ['justificado', 'Justificado'], ['injustificado', 'Injustificado']];
+let grado = null, division = null, alumnos = [], pedido = 0;
+const $ = id => document.getElementById(id);
+
+function aviso(clase, texto) { const m = $('mensaje'); m.className = 'mensaje ' + clase; m.textContent = texto; }
+function textoError(d) {
+  if (typeof d.detalle === 'string') return d.detalle;
+  if (Array.isArray(d.detail)) return d.detail.map(x => x.msg).join('. ');
+  return 'Ocurrió un error inesperado.';
+}
+
+function opciones(id, lista, elegido, alElegir) {
+  const cont = $(id); cont.textContent = '';
+  lista.forEach(v => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = v;
+    if (v === elegido) b.className = 'activo';
+    b.onclick = () => alElegir(v);
+    cont.appendChild(b);
+  });
+}
+
+function seleccion() {
+  opciones('grados', ['1°', '2°', '3°', '4°', '5°', '6°'], grado, v => { grado = v; seleccion(); });
+  opciones('divisiones', ['A', 'B', 'C', 'D'], division, v => { division = v; seleccion(); });
+  $('turno').textContent = division ? 'Turno ' + TURNOS[division] : '';
+  if (grado && division) cargar();
+}
+
+async function cargar() {
+  $('mensaje').className = 'mensaje';
+  const mio = ++pedido;
+  try {
+    const r = await fetch(`${API}/alumnos?anio=${encodeURIComponent(grado)}&division=${division}`);
+    const d = await r.json();
+    if (mio !== pedido) return;
+    if (!r.ok) return aviso('error', textoError(d));
+    alumnos = d.alumnos.map(a => ({id: a.id, nombre: a.nombre_completo, presente: true, motivo: null}));
+    $('titulo').textContent = `Alumnos de ${grado} ${division}`;
+    $('seccion-lista').classList.remove('oculto');
+    lista();
+  } catch (e) { aviso('error', 'No se pudo conectar con el servidor.'); }
+}
+
+function lista() {
+  const cont = $('lista'); cont.textContent = '';
+  alumnos.forEach(a => {
+    const t = document.createElement('div');
+    t.className = 'alumno' + (a.presente ? '' : ' ausente');
+    const fila = document.createElement('div'); fila.className = 'fila';
+    const n = document.createElement('span'); n.className = 'nombre'; n.textContent = a.nombre;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'estado'; b.textContent = a.presente ? 'Presente' : 'Ausente';
+    b.onclick = () => { a.presente = !a.presente; if (a.presente) a.motivo = null; lista(); };
+    fila.append(n, b); t.appendChild(fila);
+    if (!a.presente) {
+      const m = document.createElement('div'); m.className = 'motivos';
+      MOTIVOS.forEach(([valor, texto]) => {
+        const x = document.createElement('button');
+        x.type = 'button'; x.textContent = texto;
+        if (a.motivo === valor) x.className = 'activo';
+        x.onclick = () => { a.motivo = valor; lista(); };
+        m.appendChild(x);
+      });
+      t.appendChild(m);
+    }
+    cont.appendChild(t);
+  });
+  const aus = alumnos.filter(a => !a.presente).length;
+  $('resumen').textContent = alumnos.length
+    ? `Presentes: ${alumnos.length - aus} · Ausentes: ${aus}` : 'No hay alumnos cargados en este curso.';
+  $('guardar').disabled = alumnos.length === 0;
+}
+
+async function guardar() {
+  $('mensaje').className = 'mensaje';
+  const falta = alumnos.find(a => !a.presente && !a.motivo);
+  if (falta) return aviso('error', 'Elegí el motivo de la ausencia de ' + falta.nombre + '.');
+  if (!$('fecha').value) return aviso('error', 'Elegí la fecha.');
+  $('guardar').disabled = true;
+  try {
+    const r = await fetch(API + '/asistencia', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        anio: grado, division: division, fecha: $('fecha').value,
+        registros: alumnos.map(a => ({alumno_id: a.id, presente: a.presente, motivo_inasistencia: a.presente ? null : a.motivo})),
+      }),
+    });
+    const d = await r.json();
+    if (r.ok) aviso('ok', `Asistencia guardada: ${d.cantidad_registrados} alumnos de ${grado} ${division}.`);
+    else aviso('error', textoError(d));
+  } catch (e) { aviso('error', 'No se pudo conectar con el servidor.'); }
+  $('guardar').disabled = alumnos.length === 0;
+}
+
+const hoy = new Date();
+$('fecha').value = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
+$('guardar').onclick = guardar;
+seleccion();
+</script>
+</body>
+</html>

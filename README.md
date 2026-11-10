@@ -48,10 +48,10 @@ tests/
 | API REST con FastAPI | Completa (primera versión) |
 | Login por usuario y rol | Pendiente |
 | Carga masiva de nómina | Pendiente |
-| Interfaz web para celular y tablet | Pendiente |
+| Interfaz web para celular y tablet | MVP listo: pantalla de pasar lista |
 | Controles de calidad (ruff, pyright, tests de arquitectura) | Pendiente |
 
-**Tests:** 61 pasando (56 unitarios y 5 de integración).
+**Tests:** 78 pasando (70 unitarios, 5 de integración y 3 de punta a punta).
 
 ## API
 
