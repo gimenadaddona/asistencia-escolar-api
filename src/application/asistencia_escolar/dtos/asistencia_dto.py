@@ -46,6 +46,14 @@ class ReporteAlertasResponse(BaseModel):
     total_alumnos_en_alerta: int
     
 
+class AccionResumenResponse(BaseModel):
+    fecha: date
+    tipo_accion: str
+    descripcion: str
+    realizado_por: str
+    rol_autor: str
+
+
 class AlumnoEnSeguimientoResponse(BaseModel):
     """Un alumno en alerta, junto con todo lo que ya se hizo por el."""
     alumno_id: int
@@ -53,7 +61,7 @@ class AlumnoEnSeguimientoResponse(BaseModel):
     anio: str
     division: str
     cantidad_faltas_injustificadas: int
-    acciones: List[dict]
+    acciones: List[AccionResumenResponse]
 
 
 class ReporteSeguimientoResponse(BaseModel):
