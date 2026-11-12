@@ -59,8 +59,8 @@ class TestGenerarReporteSeguimientoUseCase:
         assert alumno_seguimiento.nombre_completo == "Perez, Juan"
         assert alumno_seguimiento.cantidad_faltas_injustificadas == 5
         assert len(alumno_seguimiento.acciones) == 1
-        assert alumno_seguimiento.acciones[0]["tipo_accion"] == "llamado_familia"
-        assert alumno_seguimiento.acciones[0]["realizado_por"] == "Marta Gomez"
+        assert alumno_seguimiento.acciones[0].tipo_accion == "llamado_familia"
+        assert alumno_seguimiento.acciones[0].realizado_por == "Marta Gomez"
 
     def test_alumno_en_alerta_sin_acciones_muestra_lista_vacia(self) -> None:
         alumno_repo = FakeAlumnoRepository()
