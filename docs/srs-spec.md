@@ -78,7 +78,7 @@ Es una herramienta institucional para una escuela pública, sin fines comerciale
 | FR-08 | **Carga masiva de nómina** en un solo pedido. | Pendiente |
 | FR-09 | **Opciones para selectores en cascada** (ciclo, grado, división) que alimenten la interfaz. | Pendiente |
 | FR-10 | **Autenticación y roles:** el docente carga datos; directivo y orientación solo consultan. **Obligatorio antes de un uso real.** | Pendiente |
-| FR-11 | **Interfaz web responsive** para celular y tablet: elegir el curso con botones, ver a todos como presentes y marcar solo a quienes faltan. | Pendiente |
+| FR-11 | **Interfaz web responsive** para celular y tablet: elegir el curso con botones, ver a todos como presentes y marcar solo a quienes faltan. | MVP implementado (pasar lista) |
 
 ### 3.2. Requisitos no funcionales
 
@@ -167,13 +167,13 @@ tests/
 | Parámetros críticos desde configuración | **Parcial:** las listas de grados y divisiones y el umbral por defecto de alertas (5) están en el código. Conviene moverlos a configuración. |
 | Controladores delgados | Respetada: los routers solo llaman a los casos de uso. La capa `adapters` no se usa por ahora. |
 | Imports absolutos | Respetada. |
-| Tipado estricto | **Parcial:** pyright todavía no se ejecutó, y el reporte de seguimiento usa `List[dict]` para las acciones, que debería ser un tipo definido. |
+| Tipado estricto | **Parcial:** pyright todavía no se ejecutó, y el reporte de seguimiento ya usa un tipo definido para las acciones. |
 
 ---
 
 ## 5. Calidad y pruebas
 
-- **61 tests automáticos pasando:** 56 unitarios (dominio y casos de uso con repositorios en memoria) y 5 de integración (repositorios reales contra SQLite en memoria).
+- **78 tests automáticos pasando:** 70 unitarios, 5 de integración y 3 de punta a punta (API y pantalla). Un workflow de GitHub Actions los corre en cada push.
 - **Verificación manual** de cada endpoint desde la documentación interactiva en `/docs`.
 - **Defecto encontrado y corregido:** al probar manualmente, "pasar lista" aceptaba alumnos inexistentes y valores inválidos de grado y división. Se agregaron las validaciones y tests de regresión.
 - **Pendiente:** ruff, pyright, tests de arquitectura y medición de cobertura.
