@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pasar lista</title>
+<link rel='icon' href='data:,'>
 <style>
 /* COLORES: para usar la paleta asignada, modificar solo este bloque */
 :root{--primario:#1f5fbf;--sobre-primario:#fff;--fondo:#f4f6fa;--tarjeta:#fff;--texto:#1d2433;--borde:#d5dbe6;--presente:#2e8b57;--ausente:#c0392b}
@@ -95,7 +96,7 @@ async function cargar() {
     $('titulo').textContent = `Alumnos de ${grado} ${division}`;
     $('seccion-lista').classList.remove('oculto');
     lista();
-  } catch (e) { aviso('error', 'No se pudo conectar con el servidor.'); }
+  } catch (e) { console.error(e); aviso('error', 'No se pudo conectar con el servidor.'); }
 }
 
 function lista() {
@@ -146,7 +147,7 @@ async function guardar() {
     const d = await r.json();
     if (r.ok) aviso('ok', `Asistencia guardada: ${d.cantidad_registrados} alumnos de ${grado} ${division}.`);
     else aviso('error', textoError(d));
-  } catch (e) { aviso('error', 'No se pudo conectar con el servidor.'); }
+  } catch (e) { console.error(e); aviso('error', 'No se pudo conectar con el servidor.'); }
   $('guardar').disabled = alumnos.length === 0;
 }
 
@@ -154,6 +155,8 @@ const hoy = new Date();
 $('fecha').value = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + String(hoy.getDate()).padStart(2, '0');
 $('guardar').onclick = guardar;
 seleccion();
+window.addEventListener('error', e => console.error('Error en la pagina:', e.message));
+window.addEventListener('unhandledrejection', e => console.error('Promesa sin manejar:', e.reason));
 </script>
 </body>
 </html>
