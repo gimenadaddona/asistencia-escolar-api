@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from src.domain.asistencia_escolar.exceptions import DatosInvalidosError
-from src.infrastructure.fastapi.routers import acciones, alumnos, asistencia, reportes, web
+from src.infrastructure.fastapi.routers import acciones, alumnos, asistencia, reportes, web, importacion
 from src.infrastructure.settings.config import get_settings
 from src.infrastructure.settings.logger import logger
 from src.infrastructure.sqlalchemy.database import engine
@@ -34,7 +34,7 @@ def create_app() -> FastAPI:
         )
 
     app.include_router(web.router)
-    for router in (alumnos.router, asistencia.router, acciones.router, reportes.router):
+    for router in (alumnos.router, asistencia.router, acciones.router, reportes.router, importacion.router):
         app.include_router(router, prefix=settings.API_V1_PREFIX)
 
     return app

@@ -84,3 +84,22 @@ def test_rechaza_datos_invalidos_y_pasar_lista_dos_veces(cliente: TestClient) ->
     datos = planilla([{"alumno_id": id_juan, "presente": True, "motivo_inasistencia": None}])
     assert cliente.post("/api/v1/asistencia", json=datos).status_code == 201
     assert cliente.post("/api/v1/asistencia", json=datos).status_code == 400
+
+
+def test_importar_nomina_con_vista_previa(cliente: TestClient) -> None:
+    previa = cliente.post(
+        "/api/v1/alumnos/importar/vista-previa",
+        json={"texto": "1. Perez, Juan\n2. Gomez Ana"},
+    ).json()
+    assert len(previa["candidatos"]) == 2
+
+    alumnos = [{"apellido": c["apellido"], "nombre": c["nombre"]} for c in previa["candidatos"]]
+    respuesta = cliente.post(
+        "/api/v1/alumnos/importar",
+        json={"anio": "2°", "division": "A", "alumnos": alumnos},
+    )
+    assert respuesta.status_code == 201
+    assert len(respuesta.json()["registrados"]) == 2
+
+    nomina = cliente.get("/api/v1/alumnos", params={"anio": "2°", "division": "A"}).json()
+    assert nomina["total"] == 2
